@@ -155,20 +155,24 @@ def TrackImages():
     j = 0
     attendances = set()
     attendance = []
-    col_names = ['Id','Name', 'Date', 'In Time', 'Out Time']
-
+    col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
+    
     ts = time.time()
     date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
 
     file_name = "Attendance\Attendance_" + date + ".csv"
     if not os.path.exists(file_name):
-        dataframe = pd.DataFrame(columns=col_names)
+        attendances.add(tuple(col_names))
+        print("166")
+        print(attendances)
+        dataframe = pd.DataFrame(data=[],columns=col_names)
         dataframe.to_csv(file_name, index=False)
 
     data = pd.read_csv("Attendance\Attendance_" + date + ".csv")
 
     for index, row in data.iterrows():
-        attendances = data.values.tolist()
+        print(index, row, tuple(row))
+        attendances.add(tuple(row))
  
     recognizer =cv2.face.LBPHFaceRecognizer_create() 
     exists3 = os.path.isfile("Pass_Train\Trainner.yml")
@@ -358,7 +362,6 @@ tb.heading('intime',text ='IN TIME')
 tb.heading('outtime',text ='OUT TIME')
 
 attendances = set()
-
 col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
 
 ts = time.time()
@@ -366,14 +369,20 @@ date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
 
 file_name = "Attendance\Attendance_" + date + ".csv"
 if not os.path.exists(file_name):
-    dataframe = pd.DataFrame(columns=col_names)
+    attendances.add(tuple(col_names))
+    print("372")
+    print(attendances)
+    dataframe = pd.DataFrame(data=[],columns=col_names)
     dataframe.to_csv(file_name, index=False)
 
 data = pd.read_csv("Attendance\Attendance_" + date + ".csv")
 
 for index, row in data.iterrows():
-    attendances = data.values.tolist()
-
+    print("380")
+    print(index, row, tuple(row))
+    attendances.add(tuple(row))
+print("384")
+print(attendances)
 tb.insert("", tk.END, values=attendances)
 # i = 0
 # date = datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%Y')
