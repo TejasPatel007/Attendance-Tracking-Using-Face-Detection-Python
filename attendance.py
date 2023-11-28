@@ -3,6 +3,8 @@ from tkinter import *
 from tkinter import messagebox as mess
 from tkinter import ttk
 import tkinter.simpledialog as tsd
+import ttkbootstrap as ttkb
+from ttkbootstrap.constants import *
 import os
 import cv2
 import csv
@@ -23,7 +25,7 @@ def on_closing():
 def clear():
     txt.delete(0, 'end')
     txt2.delete(0, 'end')
-    res = "1) Take Images  ===> 2) Save Profile"
+    res = "1) Take Images ===> 2) Save Profile"
     message1.configure(text=res)
 
 #Check for correct Path
@@ -41,10 +43,47 @@ def check_haarcascadefile():
         mess._show(title='file missing', message='some file is missing.')
         window.destroy()
 
+#show registered student details
+def student_details():
+    assure_path_exists("StudentDetails/")
+    columns = ['SERIAL NO.', 'ID', 'NAME']
+    file_name = "StudentDetails\StudentDetails.csv"
+    if not os.path.exists(file_name):
+        dataframe = pd.DataFrame(data=[],columns=columns)
+        dataframe.to_csv(file_name, index=False, header=True)
+
+    data = pd.read_csv(file_name)
+    print(data)
+    
+    table_window = tk.Toplevel()
+    table_window.title("Student Details")
+
+    table = ttk.Treeview(table_window)
+
+    # Define columns
+    table['columns'] = ('Serial No.', 'ID', 'Name')
+
+    # Format columns
+    table.column('#0', width=0, stretch=tk.NO)  # Hide first column
+    table.column('Serial No.', anchor=tk.W, width=100)
+    table.column('ID', anchor=tk.CENTER, width=70)
+    table.column('Name', anchor=tk.W, width=120)
+
+    # Create headings
+    table.heading('#0', text='', anchor=tk.W)
+    table.heading('Serial No.', text='Serial No.', anchor=tk.W)
+    table.heading('ID', text='ID', anchor=tk.CENTER)
+    table.heading('Name', text='Name', anchor=tk.W)
+
+    table.pack(expand=True, fill='both')
+
+    for index, row in data.iterrows():
+        table.insert("", 0, values=(str(row.iloc[0]), str(row.iloc[1]), str(row.iloc[2])))
+
 #$$$$$$$$$$$$$
 def TakeImages():
     check_haarcascadefile()
-    columns = ['SERIAL NO.', '', 'ID', '', 'NAME']
+    columns = ['SERIAL NO.', 'ID', 'NAME']
     assure_path_exists("StudentDetails/")
     assure_path_exists("TrainingImage/")
     serial = 0
@@ -153,7 +192,7 @@ def TrackImages():
     msg = ''
     i = 0
     j = 0
-    attendances = set()
+    attendances = list()
     attendance = []
     col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
     
@@ -162,17 +201,15 @@ def TrackImages():
 
     file_name = "Attendance\Attendance_" + date + ".csv"
     if not os.path.exists(file_name):
-        attendances.add(tuple(col_names))
-        print("166")
-        print(attendances)
         dataframe = pd.DataFrame(data=[],columns=col_names)
-        dataframe.to_csv(file_name, index=False)
+        dataframe.to_csv(file_name, index=False, header=True)
 
-    data = pd.read_csv("Attendance\Attendance_" + date + ".csv")
+    data = pd.read_csv(file_name)
 
     for index, row in data.iterrows():
+        print("174")
         print(index, row, tuple(row))
-        attendances.add(tuple(row))
+        attendances.append(tuple(row))
  
     recognizer =cv2.face.LBPHFaceRecognizer_create() 
     exists3 = os.path.isfile("Pass_Train\Trainner.yml")
@@ -228,35 +265,14 @@ def TrackImages():
                         present = True
                         break
                 if(present == False):
-                    attendances.add(tuple(attendance))
+                    attendances.append(tuple(attendance))
         cv2.imshow('Taking Attendance', im)
         if (cv2.waitKey(1) == ord('q')):
             break
-    ts = time.time()
-    date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
-    exists = os.path.isfile("Attendance\Attendance_" + date + ".csv")
-    if exists:
-        with open("Attendance\Attendance_" + date + ".csv", 'w') as csvFile1:
-            writer = csv.writer(csvFile1)
-            for att in attendances:
-                writer.writerow(att)
-        csvFile1.close()
-    else:
-        with open("Attendance\Attendance_" + date + ".csv", 'w') as csvFile1:
-            writer = csv.writer(csvFile1)
-            writer.writerow(col_names)
-            for att in attendances:
-                writer.writerow(att)
-        csvFile1.close()
-    # with open("Attendance\Attendance_" + date + ".csv", 'r') as csvFile1:
-    #     reader1 = csv.reader(csvFile1)
-    #     for lines in reader1:
-    #         i = i + 1
-    #         if (i > 1):
-    #             if (i % 2 != 0):
-    #                 iidd = str(lines[0]) + '   '
-    #                 tb.insert('', 0, text=iidd, values=(str(lines[1]), str(lines[2]), str(lines[3]), str(lines[4])))
-    tb.insert("", tk.END, values=attendances)
+    dataframe = pd.DataFrame(data=attendances,columns=col_names)
+    dataframe.to_csv(file_name, index=False, header=True)
+    for att in attendances:
+        tb.insert("", 0, text=att[0], values=(str(att[1]), str(att[2]), str(att[3]), str(att[4])))
     csvFile1.close()
     cam.release()
     cv2.destroyAllWindows()
@@ -269,16 +285,24 @@ window.geometry("1280x720")
 window.resizable(True,True)
 window.configure(background='#355454')
 
+#Help menubar----------------------------------------------
+menubar=Menu(window)
+menubar.add_command(label="Student Details",command=student_details)
+menubar.add_command(label="Exit",command=on_closing)
+
+#This line will attach our menu to window
+window.config(menu=menubar)
+
 #main window------------------------------------------------
-message3 = tk.Label(window, text="Face Recognition Based Attendance System" ,fg="white",bg="#355454" ,width=60 ,height=1,font=('times', 29, ' bold '))
-message3.place(x=10, y=10,relwidth=1)
+# message3 = tk.Label(window, text="Face Recognition Based Attendance System" ,fg="white",bg="#355454" ,width=60 ,height=1,font=('times', 29, ' bold '))
+# message3.place(x=10, y=10,relwidth=1)
 
 #frames-------------------------------------------------
 frame1 = tk.Frame(window, bg="white")
-frame1.place(relx=0.11, rely=0.15, relwidth=0.39, relheight=0.80)
+frame1.place(relx=0.11, rely=0.02, relwidth=0.39, relheight=0.80)
 
 frame2 = tk.Frame(window, bg="white")
-frame2.place(relx=0.51, rely=0.15, relwidth=0.39, relheight=0.80)
+frame2.place(relx=0.51, rely=0.02, relwidth=0.39, relheight=0.80)
 
 #frame_headder
 fr_head1 = tk.Label(frame1, text="Register New Student", fg="white",bg="black" ,font=('times', 17, ' bold ') )
@@ -289,25 +313,22 @@ fr_head2.place(x=0,y=0,relwidth=1)
 
 #registration frame
 lbl = tk.Label(frame1, text="Enter ID",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 17, ' bold ') )
-lbl.place(x=0, y=55)
+lbl.place(x=-15, y=40)
 
 txt = tk.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 15, ' bold '))
-txt.place(x=55, y=88,relwidth=0.75)
+txt.place(x=55, y=75,relwidth=0.75)
 
-lbl2 = tk.Label(frame1, text="Enter Name",width=20  ,fg="black"  ,bg="white" ,font=('times', 17, ' bold '))
-lbl2.place(x=0, y=140)
+lbl2 = tk.Label(frame1, text="Enter Name",width=20  ,height=1  ,fg="black"  ,bg="white" ,font=('times', 17, ' bold '))
+lbl2.place(x=0, y=110)
 
 txt2 = tk.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 15, ' bold ')  )
-txt2.place(x=55, y=173,relwidth=0.75)
-
-message0=tk.Label(frame1,text="Follow the steps...",bg="white" ,fg="black"  ,width=39 ,height=1,font=('times', 16, ' bold '))
-message0.place(x=7,y=275)
+txt2.place(x=55, y=145,relwidth=0.75)
 
 message1 = tk.Label(frame1, text="1) Take Images ===> 2) Save Profile" ,bg="white" ,fg="black"  ,width=39 ,height=1, activebackground = "yellow" ,font=('times', 15, ' bold '))
-message1.place(x=7, y=300)
+message1.place(x=7, y=225)
 
 message = tk.Label(frame1, text="" ,bg="white" ,fg="black"  ,width=39,height=1, activebackground = "yellow" ,font=('times', 16, ' bold '))
-message.place(x=7, y=500)
+message.place(x=7, y=350)
 #Attendance frame
 lbl3 = tk.Label(frame2, text="Attendance Table",width=20  ,fg="black"  ,bg="white"  ,height=1 ,font=('times', 17, ' bold '))
 lbl3.place(x=100, y=115)
@@ -329,13 +350,13 @@ message.configure(text='Total Registrations : '+str(res))
 #BUTTONS----------------------------------------------
 
 clearButton = tk.Button(frame1, text="Clear", command=clear, fg="white", bg="#13059c", width=11, activebackground = "white", font=('times', 12, ' bold '))
-clearButton.place(x=55, y=230,relwidth=0.29)
+clearButton.place(x=55, y=190,relwidth=0.29)
 
-takeImg = tk.Button(frame1, text="Take Images", command=TakeImages, fg="black", bg="#00aeff", width=34, height=1, activebackground = "white", font=('times', 16, ' bold '))
-takeImg.place(x=30, y=350,relwidth=0.89)
+takeImg = tk.Button(frame1, text="Take Images", command=TakeImages, fg="black", bg="#00aeff", width=20, height=1, activebackground = "white", font=('times', 16, ' bold '))
+takeImg.place(x=30, y=260,relwidth=0.89)
 
-trainImg = tk.Button(frame1, text="Save Profile", command=TrainImages, fg="black", bg="#00aeff", width=34, height=1, activebackground = "white", font=('times', 16, ' bold '))
-trainImg.place(x=30, y=430,relwidth=0.89)
+trainImg = tk.Button(frame1, text="Save Profile", command=TrainImages, fg="black", bg="#00aeff", width=20, height=1, activebackground = "white", font=('times', 16, ' bold '))
+trainImg.place(x=30, y=305,relwidth=0.89)
 
 trackImg = tk.Button(frame2, text="Take Attendance", command=TrackImages, fg="black", bg="#00aeff", height=1, activebackground = "white" ,font=('times', 16, ' bold '))
 trackImg.place(x=30,y=60,relwidth=0.89)
@@ -344,11 +365,11 @@ quitWindow = tk.Button(frame2, text="Quit", command=window.destroy, fg="white", 
 quitWindow.place(x=30, y=450,relwidth=0.89)
 
 #Attandance table----------------------------
-style = ttk.Style()
+style = ttkb.Style("pulse")
 style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Calibri', 11)) # Modify the font of the body
 style.configure("mystyle.Treeview.Heading",font=('times', 13,'bold')) # Modify the font of the headings
 style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})]) # Remove the borders
-tb= ttk.Treeview(frame2,height =13,columns = ('name','date','intime','outtime'),style="mystyle.Treeview")
+tb= ttkb.Treeview(frame2,height =13,columns = ('name','date','intime','outtime'),style="mystyle.Treeview")
 tb.column('#0',width=70)
 tb.column('name',width=100)
 tb.column('date',width=100)
@@ -361,44 +382,23 @@ tb.heading('date',text ='DATE')
 tb.heading('intime',text ='IN TIME')
 tb.heading('outtime',text ='OUT TIME')
 
-attendances = set()
 col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
-
 ts = time.time()
 date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
 
 file_name = "Attendance\Attendance_" + date + ".csv"
 if not os.path.exists(file_name):
-    attendances.add(tuple(col_names))
-    print("372")
-    print(attendances)
     dataframe = pd.DataFrame(data=[],columns=col_names)
     dataframe.to_csv(file_name, index=False)
 
-data = pd.read_csv("Attendance\Attendance_" + date + ".csv")
+data = pd.read_csv(file_name)
 
 for index, row in data.iterrows():
-    print("380")
-    print(index, row, tuple(row))
-    attendances.add(tuple(row))
-print("384")
-print(attendances)
-tb.insert("", tk.END, values=attendances)
-# i = 0
-# date = datetime.datetime.fromtimestamp(time.time()).strftime('%d-%m-%Y')
-# with open("Attendance\Attendance_" + date + ".csv", 'r') as csvFile1:
-#         reader1 = csv.reader(csvFile1)
-#         for lines in reader1:
-#             i = i + 1
-#             if (i > 1):
-#                 if (i % 2 != 0):
-#                     iidd = str(lines[0]) + '   '
-#                     tb.insert('', 0, text=iidd, values=(str(lines[1]), str(lines[2]), str(lines[3]), str(lines[4])))
-# csvFile1.close()
+    tb.insert("", 0, text=row.iloc[0], values=(str(row.iloc[1]), str(row.iloc[2]), str(row.iloc[3]), str(row.iloc[4])))
 
 #SCROLLBAR--------------------------------------------------
 
-scroll=ttk.Scrollbar(frame2,orient='vertical',command=tb.yview)
+scroll=ttkb.Scrollbar(frame2,orient='vertical',command=tb.yview)
 scroll.grid(row=2,column=4,padx=(0,100),pady=(150,0),sticky='ns')
 tb.configure(yscrollcommand=scroll.set)
 
