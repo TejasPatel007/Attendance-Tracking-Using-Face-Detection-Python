@@ -53,7 +53,7 @@ def student_details():
         dataframe.to_csv(file_name, index=False, header=True)
 
     data = pd.read_csv(file_name)
-    print(data)
+    # print(data)
     
     table_window = tk.Toplevel()
     table_window.title("Student Details")
