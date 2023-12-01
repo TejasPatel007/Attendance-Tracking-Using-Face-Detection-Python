@@ -14,6 +14,7 @@ import pandas as pd
 import datetime
 import time
 
+
 #Functions===========================================================
 
 #AskforQUIT
@@ -53,8 +54,7 @@ def student_details():
         dataframe.to_csv(file_name, index=False, header=True)
 
     data = pd.read_csv(file_name)
-    # print(data)
-    
+
     table_window = tk.Toplevel()
     table_window.title("Student Details")
 
@@ -78,7 +78,31 @@ def student_details():
     table.pack(expand=True, fill='both')
 
     for index, row in data.iterrows():
-        table.insert("", 0, values=(str(row.iloc[0]), str(row.iloc[1]), str(row.iloc[2])))
+        table.insert("", 0, values=(row.iloc[0], row.iloc[1], row.iloc[2]))
+
+def delete():
+    studentID = txt.get()
+    if(studentID != None and len(studentID) > 0):
+        if mess.askyesno("Delete?", "Are you sure you want to delete the student with ID : "+studentID):
+            print("Deleting the student with ID : "+studentID)
+            file_name = "StudentDetails\StudentDetails.csv"
+            if os.path.exists(file_name):
+                data = pd.read_csv(file_name)
+                index = data[data['ID']==int(studentID)].index.array[0]
+                name = str(data.loc[index]['NAME'])
+                serialNo = str(data.loc[index]['SERIAL NO.'])
+                id = str(data.loc[index]['ID'])
+                whole = name+"."+serialNo+"."+id
+                dir = "C:\\Tejas\\Code\\attendance\\TrainingImage\\"
+                for file in os.listdir(dir):
+                    if file.startswith(whole):
+                       os.remove(dir+file)
+                newdata = data[data['ID']!=int(studentID)]
+                newdata.to_csv(file_name, index=False)
+        else:
+            print("Not deleting the student with ID : "+studentID)
+    else:
+        mess.showerror("Error", "Please Enter Student ID")
 
 #$$$$$$$$$$$$$
 def TakeImages():
@@ -86,21 +110,15 @@ def TakeImages():
     columns = ['SERIAL NO.', 'ID', 'NAME']
     assure_path_exists("StudentDetails/")
     assure_path_exists("TrainingImage/")
-    serial = 0
-    exists = os.path.isfile("StudentDetails\StudentDetails.csv")
-    if exists:
-        with open("StudentDetails\StudentDetails.csv", 'r') as csvFile1:
-            reader1 = csv.reader(csvFile1)
-            for l in reader1:
-                serial = serial + 1
-        serial = (serial // 2)
-        csvFile1.close()
-    else:
-        with open("StudentDetails\StudentDetails.csv", 'a+') as csvFile1:
-            writer = csv.writer(csvFile1)
-            writer.writerow(columns)
-            serial = 1
-        csvFile1.close()
+    assure_path_exists("StudentDetails/")
+    columns = ['SERIAL NO.', 'ID', 'NAME']
+    file_name = "StudentDetails\StudentDetails.csv"
+    if not os.path.exists(file_name):
+        dataframe = pd.DataFrame(data=[],columns=columns)
+        dataframe.to_csv(file_name, index=False, header=True)
+
+    data = pd.read_csv(file_name)
+    serial = data.size + 1
     Id = (txt.get())
     name = (txt2.get())
     if ((name.isalpha()) or (' ' in name)):
@@ -117,7 +135,7 @@ def TakeImages():
                 # incrementing sample number
                 sampleNum = sampleNum + 1
                 # saving the captured face in the dataset folder TrainingImage
-                cv2.imwrite("TrainingImage\ " + name + "." + str(serial) + "." + Id + '.' + str(sampleNum) + ".jpg",
+                cv2.imwrite("TrainingImage\\" + name + "." + str(serial) + "." + Id + '.' + str(sampleNum) + ".jpg",
                             gray[y:y + h, x:x + w])
                 # display the frame
                 cv2.imshow('Taking Images', img)
@@ -131,15 +149,14 @@ def TakeImages():
         cv2.destroyAllWindows()
         res = "Images Taken for ID : " + Id
         row = [serial, Id, name]
-        with open('StudentDetails\StudentDetails.csv', 'a+') as csvFile:
-            writer = csv.writer(csvFile)
-            writer.writerow(row)
-        csvFile.close()
+        data.loc[data.size+1] = row
+        data.to_csv(file_name, index=False, header=True)
         message1.configure(text=res)
     else:
         if (name.isalpha() == False):
             res = "Enter Correct name"
             message.configure(text=res)
+
 ########################################################################################
 #$$$$$$$$$$$$$
 def TrainImages():
@@ -207,8 +224,6 @@ def TrackImages():
     data = pd.read_csv(file_name)
 
     for index, row in data.iterrows():
-        print("174")
-        print(index, row, tuple(row))
         attendances.append(tuple(row))
  
     recognizer =cv2.face.LBPHFaceRecognizer_create() 
@@ -267,13 +282,12 @@ def TrackImages():
                 if(present == False):
                     attendances.append(tuple(attendance))
         cv2.imshow('Taking Attendance', im)
-        if (cv2.waitKey(1) == ord('q')):
+        if (cv2.waitKey(1) & 0xFF == ord('q')):
             break
     dataframe = pd.DataFrame(data=attendances,columns=col_names)
     dataframe.to_csv(file_name, index=False, header=True)
     for att in attendances:
         tb.insert("", 0, text=att[0], values=(str(att[1]), str(att[2]), str(att[3]), str(att[4])))
-    csvFile1.close()
     cam.release()
     cv2.destroyAllWindows()
 
@@ -351,6 +365,9 @@ message.configure(text='Total Registrations : '+str(res))
 
 clearButton = tk.Button(frame1, text="Clear", command=clear, fg="white", bg="#13059c", width=11, activebackground = "white", font=('times', 12, ' bold '))
 clearButton.place(x=55, y=190,relwidth=0.29)
+
+clearButton = tk.Button(frame1, text="Delete", command=delete, fg="white", bg="#13059c", width=11, activebackground = "white", font=('times', 12, ' bold '))
+clearButton.place(x=255, y=190,relwidth=0.29)
 
 takeImg = tk.Button(frame1, text="Take Images", command=TakeImages, fg="black", bg="#00aeff", width=20, height=1, activebackground = "white", font=('times', 16, ' bold '))
 takeImg.place(x=30, y=260,relwidth=0.89)
