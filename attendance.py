@@ -298,6 +298,7 @@ window.title("Face Recognition Based Attendance System")
 window.geometry("1280x720")
 window.resizable(True,True)
 window.configure(background='#355454')
+window.iconbitmap("icon.ico")
 
 #Help menubar----------------------------------------------
 menubar=Menu(window)
