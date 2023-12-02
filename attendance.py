@@ -48,7 +48,7 @@ def check_haarcascadefile():
 def student_details():
     assure_path_exists("StudentDetails/")
     columns = ['SERIAL NO.', 'ID', 'NAME']
-    file_name = "StudentDetails\StudentDetails.csv"
+    file_name = "StudentDetails\\StudentDetails.csv"
     if not os.path.exists(file_name):
         dataframe = pd.DataFrame(data=[],columns=columns)
         dataframe.to_csv(file_name, index=False, header=True)
@@ -85,7 +85,7 @@ def delete():
     if(studentID != None and len(studentID) > 0):
         if mess.askyesno("Delete?", "Are you sure you want to delete the student with ID : "+studentID):
             print("Deleting the student with ID : "+studentID)
-            file_name = "StudentDetails\StudentDetails.csv"
+            file_name = "StudentDetails\\StudentDetails.csv"
             if os.path.exists(file_name):
                 data = pd.read_csv(file_name)
                 index = data[data['ID']==int(studentID)].index.array[0]
@@ -93,7 +93,7 @@ def delete():
                 serialNo = str(data.loc[index]['SERIAL NO.'])
                 id = str(data.loc[index]['ID'])
                 whole = name+"."+serialNo+"."+id
-                dir = "C:\\Tejas\\Code\\attendance\\TrainingImage\\"
+                dir = "F:\\Immigration\\USA\\MSU\\515-03-Soft Eng\\NEW\\Project\\Demo\\TrainingImage"
                 for file in os.listdir(dir):
                     if file.startswith(whole):
                        os.remove(dir+file)
@@ -112,7 +112,7 @@ def TakeImages():
     assure_path_exists("TrainingImage/")
     assure_path_exists("StudentDetails/")
     columns = ['SERIAL NO.', 'ID', 'NAME']
-    file_name = "StudentDetails\StudentDetails.csv"
+    file_name = "StudentDetails\\StudentDetails.csv"
     if not os.path.exists(file_name):
         dataframe = pd.DataFrame(data=[],columns=columns)
         dataframe.to_csv(file_name, index=False, header=True)
@@ -171,7 +171,7 @@ def TrainImages():
     except:
         mess._show(title='No Registrations', message='Please Register someone first!!!')
         return
-    recognizer.save("Pass_Train\Trainner.yml")
+    recognizer.save("Pass_Train\\Trainner.yml")
     res = "Profile Saved Successfully"
     message1.configure(text=res)
     message.configure(text='Total Registrations till now  : ' + str(ID[0]))
@@ -216,7 +216,7 @@ def TrackImages():
     ts = time.time()
     date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
 
-    file_name = "Attendance\Attendance_" + date + ".csv"
+    file_name = "Attendance\\Attendance_" + date + ".csv"
     if not os.path.exists(file_name):
         dataframe = pd.DataFrame(data=[],columns=col_names)
         dataframe.to_csv(file_name, index=False, header=True)
@@ -227,9 +227,9 @@ def TrackImages():
         attendances.append(tuple(row))
  
     recognizer =cv2.face.LBPHFaceRecognizer_create() 
-    exists3 = os.path.isfile("Pass_Train\Trainner.yml")
+    exists3 = os.path.isfile("Pass_Train\\Trainner.yml")
     if exists3:
-        recognizer.read("Pass_Train\Trainner.yml")
+        recognizer.read("Pass_Train\\Trainner.yml")
     else:
         mess._show(title='Data Missing', message='Please click on Save Profile to reset data!!')
         return
@@ -239,9 +239,9 @@ def TrackImages():
     cam = cv2.VideoCapture(0)
     font = cv2.FONT_HERSHEY_SIMPLEX
     
-    exists1 = os.path.isfile("StudentDetails\StudentDetails.csv")
+    exists1 = os.path.isfile("StudentDetails\\StudentDetails.csv")
     if exists1:
-        df = pd.read_csv("StudentDetails\StudentDetails.csv")
+        df = pd.read_csv("StudentDetails\\StudentDetails.csv")
     else:
         mess._show(title='Details Missing', message='Students details are missing, please check!')
         cam.release()
@@ -349,9 +349,9 @@ lbl3.place(x=100, y=115)
 
 #Display total registration----------
 res=0
-exists = os.path.isfile("StudentDetails\StudentDetails.csv")
+exists = os.path.isfile("StudentDetails\\StudentDetails.csv")
 if exists:
-    with open("StudentDetails\StudentDetails.csv", 'r') as csvFile1:
+    with open("StudentDetails\\StudentDetails.csv", 'r') as csvFile1:
         reader1 = csv.reader(csvFile1)
         for l in reader1:
             res = res + 1
@@ -403,7 +403,7 @@ col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
 ts = time.time()
 date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
 
-file_name = "Attendance\Attendance_" + date + ".csv"
+file_name = "Attendance\\Attendance_" + date + ".csv"
 if not os.path.exists(file_name):
     dataframe = pd.DataFrame(data=[],columns=col_names)
     dataframe.to_csv(file_name, index=False)
