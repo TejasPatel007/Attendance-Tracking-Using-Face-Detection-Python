@@ -14,13 +14,12 @@ import pandas as pd
 import datetime
 import time
 
-
-#Functions===========================================================
-
+#Functions
 #AskforQUIT
 def on_closing():
     if mess.askyesno("Quit", "You are exiting from the system. Do you want to continue?"):
         window.destroy()
+
 
 #clearbutton
 def clear():
@@ -29,11 +28,13 @@ def clear():
     res = "1) Take Images ===> 2) Save Profile"
     message1.configure(text=res)
 
+
 #Check for correct Path
 def assure_path_exists(path):
     dir = os.path.dirname(path)
     if not os.path.exists(dir):
         os.makedirs(dir)
+
 
 #check for haarcascade file
 def check_haarcascadefile():
@@ -43,6 +44,7 @@ def check_haarcascadefile():
     else:
         mess._show(title='file missing', message='some file is missing.')
         window.destroy()
+
 
 #show registered student details
 def student_details():
@@ -80,6 +82,7 @@ def student_details():
     for index, row in data.iterrows():
         table.insert("", 0, values=(row.iloc[0], row.iloc[1], row.iloc[2]))
 
+
 def delete():
     studentID = txt.get()
     if(studentID != None and len(studentID) > 0):
@@ -99,13 +102,13 @@ def delete():
                        os.remove(dir+file)
                 newdata = data[data['ID']!=int(studentID)]
                 newdata.to_csv(file_name, index=False)
-                message.configure(text='Total Registrations till now  : ' + data.size)
+                message.configure(text='Total Registrations till now  : ' + str(int(data.size/3)-1))
         else:
             print("Not deleting the student with ID : "+studentID)
     else:
         mess.showerror("Error", "Please Enter Student ID")
 
-#$$$$$$$$$$$$$
+
 def TakeImages():
     check_haarcascadefile()
     columns = ['SERIAL NO.', 'ID', 'NAME']
@@ -157,10 +160,6 @@ def TakeImages():
         if (name.isalpha() == False):
             res = "Enter Correct name"
             message.configure(text=res)
-
-########################################################################################
-#$$$$$$$$$$$$$
-def TrainImages():
     check_haarcascadefile()
     assure_path_exists("Pass_Train/")
     recognizer = cv2.face_LBPHFaceRecognizer.create()
@@ -175,16 +174,14 @@ def TrainImages():
     recognizer.save("Pass_Train\\Trainner.yml")
     res = "Profile Saved Successfully"
     message1.configure(text=res)
-    reg = 0
+    reg = "0"
     file_name = "StudentDetails\\StudentDetails.csv"
     if os.path.exists(file_name):
         data = pd.read_csv(file_name)
-        print(data.size)
-        reg = data.size
+        reg = str(int(data.values.size/3))
     message.configure(text='Total Registrations till now  : ' + reg)
 
-############################################################################################3
-#$$$$$$$$$$$$$
+
 def getImagesAndLabels(path):
     # get the path of all the files in the folder
     imagePaths = [os.path.join(path, f) for f in os.listdir(path)]
@@ -205,8 +202,7 @@ def getImagesAndLabels(path):
         Ids.append(ID)
     return faces, Ids
 
-###########################################################################################
-#$$$$$$$$$$$$$
+
 def TrackImages():
     check_haarcascadefile()
     assure_path_exists("Attendance/")
@@ -298,8 +294,7 @@ def TrackImages():
     cam.release()
     cv2.destroyAllWindows()
 
-#Front End===========================================================
-
+#Front End
 window = tk.Tk()
 window.title("Face Recognition Based Attendance System")
 window.geometry("1280x720")
@@ -307,7 +302,7 @@ window.resizable(True,True)
 window.configure(background='#355454')
 window.iconbitmap("icon.ico")
 
-#Help menubar----------------------------------------------
+#Help menubar
 menubar=Menu(window)
 menubar.add_command(label="Student Details",command=student_details)
 menubar.add_command(label="Exit",command=on_closing)
@@ -315,11 +310,7 @@ menubar.add_command(label="Exit",command=on_closing)
 #This line will attach our menu to window
 window.config(menu=menubar)
 
-#main window------------------------------------------------
-# message3 = tk.Label(window, text="Face Recognition Based Attendance System" ,fg="white",bg="#355454" ,width=60 ,height=1,font=('times', 29, ' bold '))
-# message3.place(x=10, y=10,relwidth=1)
-
-#frames-------------------------------------------------
+#frames
 frame1 = tk.Frame(window, bg="white")
 frame1.place(relx=0.11, rely=0.02, relwidth=0.39, relheight=0.80)
 
@@ -346,42 +337,33 @@ lbl2.place(x=0, y=110)
 txt2 = tk.Entry(frame1,width=32 ,fg="black",bg="#e1f2f2",highlightcolor="#00aeff",highlightthickness=3,font=('times', 15, ' bold ')  )
 txt2.place(x=55, y=145,relwidth=0.75)
 
-message1 = tk.Label(frame1, text="1) Take Images ===> 2) Save Profile" ,bg="white" ,fg="black"  ,width=39 ,height=1, activebackground = "yellow" ,font=('times', 15, ' bold '))
+message1 = tk.Label(frame1, text="" ,bg="white" ,fg="black"  ,width=39 ,height=1, activebackground = "yellow" ,font=('times', 15, ' bold '))
 message1.place(x=7, y=225)
 
 message = tk.Label(frame1, text="" ,bg="white" ,fg="black"  ,width=39,height=1, activebackground = "yellow" ,font=('times', 16, ' bold '))
-message.place(x=7, y=350)
+message.place(x=7, y=300)
+
 #Attendance frame
 lbl3 = tk.Label(frame2, text="Attendance Table",width=20  ,fg="black"  ,bg="white"  ,height=1 ,font=('times', 17, ' bold '))
 lbl3.place(x=100, y=115)
 
-#Display total registration----------
-res=0
-exists = os.path.isfile("StudentDetails\\StudentDetails.csv")
-if exists:
-    with open("StudentDetails\\StudentDetails.csv", 'r') as csvFile1:
-        reader1 = csv.reader(csvFile1)
-        for l in reader1:
-            res = res + 1
-    res = (res // 2) - 1
-    csvFile1.close()
-else:
-    res = 0
-message.configure(text='Total Registrations : '+str(res))
+#Display total registration
+reg = "0"
+file_name = "StudentDetails\\StudentDetails.csv"
+if os.path.exists(file_name):
+    data = pd.read_csv(file_name)
+    reg = str(int(data.values.size/3))
+message.configure(text='Total Registrations till now  : ' + reg)
 
-#BUTTONS----------------------------------------------
-
+#BUTTONS
 clearButton = tk.Button(frame1, text="Clear", command=clear, fg="white", bg="#13059c", width=11, activebackground = "white", font=('times', 12, ' bold '))
 clearButton.place(x=55, y=190,relwidth=0.29)
 
 clearButton = tk.Button(frame1, text="Delete", command=delete, fg="white", bg="#13059c", width=11, activebackground = "white", font=('times', 12, ' bold '))
 clearButton.place(x=255, y=190,relwidth=0.29)
 
-takeImg = tk.Button(frame1, text="Take Images", command=TakeImages, fg="black", bg="#00aeff", width=20, height=1, activebackground = "white", font=('times', 16, ' bold '))
+takeImg = tk.Button(frame1, text="Take Images & Save Profile", command=TakeImages, fg="black", bg="#00aeff", width=20, height=1, activebackground = "white", font=('times', 16, ' bold '))
 takeImg.place(x=30, y=260,relwidth=0.89)
-
-trainImg = tk.Button(frame1, text="Save Profile", command=TrainImages, fg="black", bg="#00aeff", width=20, height=1, activebackground = "white", font=('times', 16, ' bold '))
-trainImg.place(x=30, y=305,relwidth=0.89)
 
 trackImg = tk.Button(frame2, text="Take Attendance", command=TrackImages, fg="black", bg="#00aeff", height=1, activebackground = "white" ,font=('times', 16, ' bold '))
 trackImg.place(x=30,y=60,relwidth=0.89)
@@ -389,7 +371,7 @@ trackImg.place(x=30,y=60,relwidth=0.89)
 quitWindow = tk.Button(frame2, text="Quit", command=window.destroy, fg="white", bg="#13059c", width=35, height=1, activebackground = "white", font=('times', 16, ' bold '))
 quitWindow.place(x=30, y=450,relwidth=0.89)
 
-#Attandance table----------------------------
+#Attandance table
 style = ttkb.Style("pulse")
 style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Calibri', 11)) # Modify the font of the body
 style.configure("mystyle.Treeview.Heading",font=('times', 13,'bold')) # Modify the font of the headings
@@ -416,18 +398,15 @@ if not os.path.exists(file_name):
     os.mkdir("Attendance")
     dataframe = pd.DataFrame(data=[],columns=col_names)
     dataframe.to_csv(file_name, index=False)
-
 data = pd.read_csv(file_name)
-
 for index, row in data.iterrows():
     tb.insert("", 0, text=row.iloc[0], values=(str(row.iloc[1]), str(row.iloc[2]), str(row.iloc[3]), str(row.iloc[4])))
 
-#SCROLLBAR--------------------------------------------------
-
+#SCROLLBAR
 scroll=ttkb.Scrollbar(frame2,orient='vertical',command=tb.yview)
 scroll.grid(row=2,column=4,padx=(0,100),pady=(150,0),sticky='ns')
 tb.configure(yscrollcommand=scroll.set)
 
-#closing lines------------------------------------------------
+#closing lines
 window.protocol("WM_DELETE_WINDOW", on_closing)
 window.mainloop()
