@@ -93,12 +93,13 @@ def delete():
                 serialNo = str(data.loc[index]['SERIAL NO.'])
                 id = str(data.loc[index]['ID'])
                 whole = name+"."+serialNo+"."+id
-                dir = "F:\\Immigration\\USA\\MSU\\515-03-Soft Eng\\NEW\\Project\\Demo\\TrainingImage"
+                dir = "TrainingImage\\"
                 for file in os.listdir(dir):
                     if file.startswith(whole):
                        os.remove(dir+file)
                 newdata = data[data['ID']!=int(studentID)]
                 newdata.to_csv(file_name, index=False)
+                message.configure(text='Total Registrations till now  : ' + data.size)
         else:
             print("Not deleting the student with ID : "+studentID)
     else:
@@ -174,7 +175,13 @@ def TrainImages():
     recognizer.save("Pass_Train\\Trainner.yml")
     res = "Profile Saved Successfully"
     message1.configure(text=res)
-    message.configure(text='Total Registrations till now  : ' + str(ID[0]))
+    reg = 0
+    file_name = "StudentDetails\\StudentDetails.csv"
+    if os.path.exists(file_name):
+        data = pd.read_csv(file_name)
+        print(data.size)
+        reg = data.size
+    message.configure(text='Total Registrations till now  : ' + reg)
 
 ############################################################################################3
 #$$$$$$$$$$$$$
@@ -406,6 +413,7 @@ date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
 
 file_name = "Attendance\\Attendance_" + date + ".csv"
 if not os.path.exists(file_name):
+    os.mkdir("Attendance")
     dataframe = pd.DataFrame(data=[],columns=col_names)
     dataframe.to_csv(file_name, index=False)
 
