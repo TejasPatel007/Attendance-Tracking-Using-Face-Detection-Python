@@ -283,7 +283,8 @@ def TrackImages():
                         present = True
                         break
                 if(present == False):
-                    attendances.append(tuple(attendance))
+                    if(attendance[1]!=None and len(attendance[1]) > 0):
+                        attendances.append(tuple(attendance))
         cv2.imshow('Taking Attendance', im)
         if (cv2.waitKey(1) & 0xFF == ord('q')):
             break
