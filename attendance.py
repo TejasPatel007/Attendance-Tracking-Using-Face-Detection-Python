@@ -25,8 +25,7 @@ def on_closing():
 def clear():
     txt.delete(0, 'end')
     txt2.delete(0, 'end')
-    res = "1) Take Images ===> 2) Save Profile"
-    message1.configure(text=res)
+    message1.configure(text='')
 
 
 #Check for correct Path
@@ -103,6 +102,7 @@ def delete():
                 newdata = data[data['ID']!=int(studentID)]
                 newdata.to_csv(file_name, index=False)
                 message.configure(text='Total Registrations till now  : ' + str(int(data.size/3)-1))
+                clear()
         else:
             print("Not deleting the student with ID : "+studentID)
     else:
@@ -214,7 +214,8 @@ def TrackImages():
     j = 0
     attendances = list()
     attendance = []
-    col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
+    # col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
+    col_names = ['Id', 'Name', 'Date', 'In Time']
     
     ts = time.time()
     date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
@@ -265,7 +266,8 @@ def TrackImages():
                 ID = ID[1:-1]
                 bb = str(aa)
                 bb = bb[2:-2]
-                attendance = [str(ID), bb, str(date), str(timeStamp), str(timeStamp)]                
+                # attendance = [str(ID), bb, str(date), str(timeStamp), str(timeStamp)]
+                attendance = [str(ID), bb, str(date), str(timeStamp)]
             else:
                 Id = 'Unknown'
                 bb = str(Id)
@@ -291,7 +293,8 @@ def TrackImages():
     dataframe = pd.DataFrame(data=attendances,columns=col_names)
     dataframe.to_csv(file_name, index=False, header=True)
     for att in attendances:
-        tb.insert("", 0, text=att[0], values=(str(att[1]), str(att[2]), str(att[3]), str(att[4])))
+        # tb.insert("", 0, text=att[0], values=(str(att[1]), str(att[2]), str(att[3]), str(att[4])))
+        tb.insert("", 0, text=att[0], values=(str(att[1]), str(att[2]), str(att[3])))
     cam.release()
     cv2.destroyAllWindows()
 
@@ -382,15 +385,16 @@ tb.column('#0',width=70)
 tb.column('name',width=100)
 tb.column('date',width=100)
 tb.column('intime',width=100)
-tb.column('outtime',width=100)
+# tb.column('outtime',width=100)
 tb.grid(row=2,column=0,padx=(0,0),pady=(150,0),columnspan=4)
 tb.heading('#0',text ='ID')
 tb.heading('name',text ='NAME')
 tb.heading('date',text ='DATE')
 tb.heading('intime',text ='IN TIME')
-tb.heading('outtime',text ='OUT TIME')
+# tb.heading('outtime',text ='OUT TIME')
 
-col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
+# col_names = ['Id', 'Name', 'Date', 'In Time', 'Out Time']
+col_names = ['Id', 'Name', 'Date', 'In Time']
 ts = time.time()
 date = datetime.datetime.fromtimestamp(ts).strftime('%d-%m-%Y')
 
@@ -401,7 +405,8 @@ if not os.path.exists(file_name):
     dataframe.to_csv(file_name, index=False)
 data = pd.read_csv(file_name)
 for index, row in data.iterrows():
-    tb.insert("", 0, text=row.iloc[0], values=(str(row.iloc[1]), str(row.iloc[2]), str(row.iloc[3]), str(row.iloc[4])))
+    # tb.insert("", 0, text=row.iloc[0], values=(str(row.iloc[1]), str(row.iloc[2]), str(row.iloc[3]), str(row.iloc[4])))
+    tb.insert("", 0, text=row.iloc[0], values=(str(row.iloc[1]), str(row.iloc[2]), str(row.iloc[3])))
 
 #SCROLLBAR
 scroll=ttkb.Scrollbar(frame2,orient='vertical',command=tb.yview)
